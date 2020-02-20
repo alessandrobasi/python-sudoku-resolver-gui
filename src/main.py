@@ -4,9 +4,7 @@ from PyQt5.Qt import QApplication, QMainWindow, QThread, pyqtSignal
 import sys
 from PyQt5.QtWidgets import QTableWidgetItem
 
-
-
-
+# thread class
 class Solve(QThread):
     signal = pyqtSignal('PyQt_PyObject')
 
@@ -14,6 +12,7 @@ class Solve(QThread):
         super(Solve, self).__init__()
         self.sudocu = sudoku
     
+    # Try to insert number in a cell
     def tryfornum(self, y, x, num):
         for i in range(0,9):
             if self.sudocu[y][i] == num:
@@ -30,10 +29,11 @@ class Solve(QThread):
                     return False
         return True
 
+    
     def solve(self):
         for y in range(9):
             for x in range(9):
-                # salta tutti i numeri fissi/aggiunti
+                
                 if self.sudocu[y][x] == 0:
                     for n in range(1,10):
                         if self.tryfornum(y, x, n):
@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
+        # Default sudoku
         self.sudoku = [
         [5,3,0,0,7,0,0,0,0],
         [6,0,0,1,9,5,0,0,0],
@@ -75,12 +76,14 @@ class MainWindow(QMainWindow):
             self.__nextFunct()
         self.show()
     
+    # Load default sudoku or solved sudoku
     def loadSudoku(self, _sudoku=""):
         if _sudoku == "":
             _sudoku = self.sudoku
         else:
             _sudoku = _sudoku[0]
 
+        # Add number to grid
         for y in range(9):
             for x in range(9):
                 if _sudoku[y][x] != 0:
@@ -89,6 +92,7 @@ class MainWindow(QMainWindow):
                     item = QTableWidgetItem("")
                 self.tableSudoku.setItem(y,x,item)
 
+    # Load sudoku to be solved in self.sudoku
     def storeSudoku(self):
         for y in range(9):
             for x in range(9):
@@ -97,6 +101,7 @@ class MainWindow(QMainWindow):
                 else:
                     self.sudoku[y][x] = 0
 
+    # Start thread to solve sudoku
     def solveTable(self):
         self.storeSudoku()
 
@@ -104,12 +109,14 @@ class MainWindow(QMainWindow):
         self.thread.signal.connect(self.loadSudoku)
         self.thread.start()
 
+    # Clear grid
     def clearTable(self):
         for y in range(9):
             for x in range(9):
                 item = QTableWidgetItem("")
                 self.tableSudoku.setItem(y,x,item)
 
+    # Main funct
     def mainWin(self):
         self.loadSudoku()
         self.solveBtn.clicked.connect(lambda: self.solveTable())
